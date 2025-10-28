@@ -26,13 +26,13 @@ jobs:
         # Utiliza la versión 4 de setup-node
         uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: '22.x'
 
       - name: npm install, build, and test
-        # Usamos 'npm ci' (Clean Install) para CI/CD, ya que es más rápido, usa el lockfile
-        # y es más estable, lo que debería corregir el error de 'rollup'.
+        # Volvemos a 'npm install' y añadimos '--force' para intentar resolver
+        # el persistente error de 'rollup' con las dependencias opcionales.
         run: |
-          npm ci
+          npm install --force
           npm run build
           # npm run test --if-present (Mantener si tienes tests, lo quito por simplicidad)
 
@@ -56,7 +56,7 @@ jobs:
         with:
           name: node-app
           # El artifact 'node-app' ahora contiene la carpeta 'dist'
-
+          
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -64,11 +64,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_707D3FC0E54D47DF8CFF53AFA22F604E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BD6889BFEB024B1BA8D235604E199458 }}
 
-      - name: "Deploy to Azure Web App"
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "AbastoExpressPWA"
-          slot-name: "Production"
+          app-name: 'AbastoExpressPWA'
+          slot-name: 'Production'
           # CORRECCIÓN CLAVE 2: Despliega la carpeta 'dist' que está dentro del artefacto descargado
           package: dist
