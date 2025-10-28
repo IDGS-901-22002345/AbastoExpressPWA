@@ -1,4 +1,4 @@
-name: Build and deploy Vite React app to Azure Web App - AbastoExpressPWA
+name: Build and deploy React (Vite) app to Azure Web App - AbastoExpressPWA
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Build project
         run: yarn build
 
-      - name: Upload artifact for deployment
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: vite-build
@@ -40,12 +40,12 @@ jobs:
           name: vite-build
           path: dist
 
-      - name: Login to Azure
+      - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_15616D1BC0A54364ACDD1B2306E70DC7 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_707D3FC0E54D47DF8CFF53AFA22F604E }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BD6889BFEB024B1BA8D235604E }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
