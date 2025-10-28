@@ -43,9 +43,11 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          auth-type: SERVICE_PRINCIPAL
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_15616D1BC0A54364ACDD1B2306E70DC7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_707D3FC0E54D47DF8CFF53AFA22F604E }}
+          client-secret: ${{ secrets.AZUREAPPSERVICE_CLIENTSECRET_15616D1BC0A54364ACDD1B2306E70DC7 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BD6889BFEB024B1BA8D235604E199458 }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -53,3 +55,4 @@ jobs:
           app-name: 'AbastoExpressPWA'
           slot-name: 'Production'
           package: dist
+
