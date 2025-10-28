@@ -60,7 +60,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          # El artifact 'node-app' ahora contiene la carpeta 'dist'
+          # CORRECCIÓN CLAVE 3: Especificamos la ruta 'dist' para que el contenido descargado
+          # se coloque en la carpeta 'dist', restaurando la estructura esperada por el despliegue.
+          path: dist
           
       - name: Login to Azure
         uses: azure/login@v2
