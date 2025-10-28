@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read # Requerido para actions/checkout
     steps:
       - uses: actions/checkout@v4
 
@@ -20,31 +20,28 @@ jobs:
           node-version: '22.x'
           cache: 'yarn'
       
-      # ⚠️ NO necesitas 'npm install -g yarn' si ya lo estás usando en los siguientes pasos,
-      # 'actions/setup-node@v4' suele configurarlo. Lo dejo por si tu proyecto lo requiere.
+      # Instalación de Yarn si es necesario
       - name: Install Yarn
         run: npm install -g yarn
 
       - name: Yarn install, build, and test
         run: |
-          yarn install --frozen-lockfile # Mejor práctica para CI
+          yarn install --frozen-lockfile
           yarn build
 
-      # ⚠️ La instalación de 'serve' como --dev está bien, pero para que Azure la use en la runtime,
-      # lo más seguro es tratarla como una dependencia normal o de dev/peer si el build lo necesita.
-      # Ya que solo se usa para servir el BUILDEADO, es una dependencia de runtime de despliegue.
-      # La dejo como está, pero la clave está en el ARTEFACTO.
+      # Instalamos 'serve' para que esté disponible en la carpeta node_modules
       - name: Install necessary runtime server package
         run: yarn add serve --dev
         
-      # El script de inicio es CORRECTO
+      # 🚀 CORRECCIÓN 1: Creamos un script de inicio más robusto
+      # Ahora apunta directamente al binario 'serve' dentro de node_modules
       - name: Create Azure Startup Script
         run: |
-          # ⚠️ Uso de 'npx' requiere que 'node_modules' esté en el PATH.
-          # Como subiremos 'node_modules', esto debería funcionar.
-          echo 'npx serve -s dist -l 8080' > startup.sh
+          echo 'node ./node_modules/serve/bin/serve.js -s dist -l 8080' > startup.sh
           chmod +x startup.sh
 
+      # 🚀 CORRECCIÓN 2: Subimos la carpeta node_modules completa
+      # Esto garantiza que 'serve' y todas sus dependencias estén disponibles en Azure
       - name: Cleanup and Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -54,28 +51,23 @@ jobs:
             startup.sh
             package.json
             yarn.lock
-            # 🚀 ¡CAMBIO CLAVE! Incluye todo el directorio 'node_modules'.
-            # Esto asegura que 'serve' y sus dependencias estén disponibles para el 'npx' en Azure.
-            node_modules/ 
-          # ⚠️ Nota: Podrías necesitar agregar un archivo `.deployment` o especificar
-          # un directorio raíz en el paso de 'azure/webapps-deploy@v3' si tu app no está en la raíz.
-          # Por ahora, confiamos en que tu 'dist' está bien.
+            node_modules/ # ✅ Subimos el directorio completo
+            
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write
+      id-token: write # Requerido para solicitar el JWT para Azure login
       contents: read
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          path: . # Descarga en el directorio raíz del job de despliegue
+          path: . # Descarga todos los archivos, incluyendo node_modules y startup.sh
 
       - name: Login to Azure
-        # ... (Tu configuración de Azure Login)
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_15616D1BC0A54364ACDD1B2306E70DC7 }}
@@ -88,4 +80,4 @@ jobs:
         with:
           app-name: 'AbastoExpressPWA'
           slot-name: 'Production'
-          package: . # Despliega el contenido de la carpeta actual
+          package: . # Despliega la carpeta actual, que contiene 'dist', 'node_modules' y 'startup.sh'
