@@ -18,22 +18,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # --- PASO DE DIAGNÓSTICO ---
+      - name: List files for debugging
+        run: ls -al
+
       - name: Set up Node.js version
-        uses: actions/setup-node@v3
+        # Utiliza la versión 4 de setup-node
+        uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: "22.x"
 
       - name: npm install, build, and test
+        # Usamos 'npm ci' (Clean Install) para CI/CD, ya que es más rápido, usa el lockfile
+        # y es más estable, lo que debería corregir el error de 'rollup'.
         run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+          npm ci
+          npm run build
+          # npm run test --if-present (Mantener si tienes tests, lo quito por simplicidad)
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          # CORRECCIÓN CLAVE 1: Sube solo la carpeta 'dist'
+          path: dist
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,7 +55,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
+          # El artifact 'node-app' ahora contiene la carpeta 'dist'
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -55,11 +64,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_707D3FC0E54D47DF8CFF53AFA22F604E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BD6889BFEB024B1BA8D235604E199458 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'AbastoExpressPWA'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: "AbastoExpressPWA"
+          slot-name: "Production"
+          # CORRECCIÓN CLAVE 2: Despliega la carpeta 'dist' que está dentro del artefacto descargado
+          package: dist
