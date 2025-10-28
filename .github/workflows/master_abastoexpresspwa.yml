@@ -27,14 +27,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
+          # Añadimos cache: 'yarn' para optimizar la instalación
+          cache: 'yarn'
 
-      - name: npm install, build, and test
-        # Volvemos a 'npm install' y añadimos '--force' para intentar resolver
-        # el persistente error de 'rollup' con las dependencias opcionales.
+      # Instalamos Yarn globalmente
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Yarn install, build, and test
+        # Usamos Yarn para evitar el error de Rollup/dependencias opcionales de npm
         run: |
-          npm install --force
-          npm run build
-          # npm run test --if-present (Mantener si tienes tests, lo quito por simplicidad)
+          yarn install
+          yarn build
+          # yarn test --if-present (Mantener si tienes tests, lo quito por simplicidad)
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
