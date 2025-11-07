@@ -1,14 +1,27 @@
 import React from "react";
-import { X, ShoppingCart, Users, Package, BarChart2, User } from "lucide-react";
+import {
+  X,
+  ShoppingCart,
+  Users,
+  Package,
+  BarChart2,
+  User,
+  LayoutDashboard,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = ({ isOpen, toggleSidebar, activeItem, setActiveItem }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Definimos los elementos del menú
   const menuItems = [
-    { name: "Ventas", icon: ShoppingCart, id: "ventas" },
-    { name: "Inventario", icon: Package, id: "inventario" },
-    { name: "Clientes", icon: Users, id: "clientes" },
-    { name: "Usuarios", icon: User, id: "usuarios" },
-    { name: "Reportes", icon: BarChart2, id: "reportes" },
+    { name: "Dashboard", icon: LayoutDashboard, id: "/dashboard" },
+    { name: "Ventas", icon: ShoppingCart, path: "/ventas" },
+    { name: "Inventario", icon: Package, path: "/inventario" },
+    { name: "Clientes", icon: Users, path: "/clientes" },
+    { name: "Usuarios", icon: User, path: "/usuarios" },
+    { name: "Reportes", icon: BarChart2, path: "/reportes" },
   ];
 
   return (
@@ -28,15 +41,12 @@ const Sidebar = ({ isOpen, toggleSidebar, activeItem, setActiveItem }) => {
         className={`fixed top-0 left-0 w-64 bg-green-800 text-white z-50 shadow-2xl transition-transform duration-300 ease-in-out 
               md:relative md:translate-x-0 md:flex-shrink-0 md:shadow-lg md:z-auto 
               ${isOpen ? "translate-x-0" : "-translate-x-full"}
-              
-              /* ¡CAMBIO AQUÍ! Reemplazar h-full por h-screen */
-              h-screen
-              `}
+              h-screen`}
       >
         {/* Encabezado del Sidebar */}
         <div className="p-4 flex items-center justify-between border-b border-green-700">
           <h1 className="text-2xl font-bold text-green-100">
-            Abarrotera <span className="text-green-300">Neto</span>
+            Abasto <span className="text-green-300">Express</span>
           </h1>
           {/* Botón de cierre solo en móvil */}
           <button
@@ -51,20 +61,20 @@ const Sidebar = ({ isOpen, toggleSidebar, activeItem, setActiveItem }) => {
         {/* Lista de Navegación */}
         <div className="py-4">
           {menuItems.map((item) => {
-            const isActive = activeItem === item.id;
+            const isActive = location.pathname === item.path;
             return (
               <button
-                key={item.id}
+                key={item.path}
                 onClick={() => {
-                  setActiveItem(item.id);
-                  if (isOpen) toggleSidebar(); // Cierra en móvil al seleccionar
+                  navigate(item.path);
+                  if (isOpen) toggleSidebar(); // Cierra en móvil
                 }}
                 className={`flex items-center w-full p-4 space-x-3 text-sm font-medium transition-all duration-200 
-                                ${
-                                  isActive
-                                    ? "bg-green-600 text-white border-l-4 border-green-300"
-                                    : "text-green-200 hover:bg-green-700 hover:text-white"
-                                }`}
+                  ${
+                    isActive
+                      ? "bg-green-600 text-white border-l-4 border-green-300"
+                      : "text-green-200 hover:bg-green-700 hover:text-white"
+                  }`}
               >
                 <item.icon size={20} />
                 <span>{item.name}</span>
@@ -83,4 +93,5 @@ const Sidebar = ({ isOpen, toggleSidebar, activeItem, setActiveItem }) => {
     </>
   );
 };
+
 export default Sidebar;
