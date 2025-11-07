@@ -66,7 +66,7 @@ const Login = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="ejemplo@correo.com"
+                placeholder="ejemplo@gmail.com"
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full p-3 focus:outline-none"
